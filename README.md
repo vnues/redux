@@ -189,3 +189,36 @@ export default handleActions<any, any>(
 )
 
 ```
+
+## 中间件原理
+
+为了理解中间件，让我们站在框架作者的角度思考问题：如果要添加功能，你会在哪个环节添加？
+
+- Reducer：纯函数，只承担计算 State 的功能，不合适承担其他功能，也承担不了，因为理论上，纯函数不能进行读写操作。
+
+- View：与 State 一一对应，可以看作 State 的视觉层，也不合适承担其他功能。
+
+- Action：存放数据的对象，即消息的载体，只能被别人操作，自己不能进行任何操作。
+
+想来想去，只有发送 Action 的这个步骤，即store.dispatch()方法，可以添加功能。举例来说，要添加日志功能，把 Action 和 State 打印出来，可以对store.dispatch进行如下改造。
+
+```javascript
+let next = store.dispatch;
+store.dispatch = function dispatchAndLog(action) {
+  console.log('dispatching', action);
+  next(action);
+  console.log('next state', store.getState());
+}
+```
+上面代码中，对store.dispatch进行了重定义，在发送 Action 前后添加了打印功能。这就是中间件的雏形。
+
+中间件就是一个函数，对store.dispatch方法进行了改造，在发出 Action 和执行 Reducer 这两步之间，添加了其他功能。
+
+
+### 总结
+
+- import { connect } from 'react-redux'的引入异步请求的函数可以dispatch
+
+- 要理解中间件在哪个过程进行处理的
+
+
